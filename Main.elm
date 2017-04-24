@@ -18,16 +18,21 @@ main = Html.program
 
 type alias Model = List String
 
-type Msg = AddKey String
+type Msg = AddKey String | Generate
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update (AddKey key) model = (key :: model) ! []
+update msg model = 
+    case msg of
+        Generate ->
+            model ! [Key.generate <| AddKey "test"]
+        AddKey key ->
+            (key :: model) ! []
 
 preCode attrs content =
     pre [] [ code [] [ text content ] ]
 
 view model = 
     div [] 
-        [ button [onClick <| AddKey "hello"] [text "hello"]
+        [ button [onClick Generate] [text "Generate"]
         , preCode [] <| String.join "\n" model
         ]

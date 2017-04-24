@@ -77,8 +77,8 @@ type alias State =
     Random.Seed
 
 generate : msg -> Cmd msg
-generate tagger =
-    command <| Generate tagger
+generate =
+    command << Generate
 
 cmdMap : (a -> b) -> MgrCmd a -> MgrCmd b
 cmdMap func (Generate a) =
