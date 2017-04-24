@@ -5,6 +5,9 @@ import Random
 import Random.String as Random
 import Time
 
+{--
+    See the EFFECT MANAGER section for the troubled part of this file.
+--}
 
 -- firebase key generation
 generateKeys : Random.Seed -> Int -> Task Never (List String, Random.Seed)
@@ -76,6 +79,7 @@ type MgrCmd msg = Generate msg
 type alias State =
     Random.Seed
 
+-- Shoule have a type signature like 
 generate : msg -> Cmd msg
 generate =
     command << Generate
@@ -86,7 +90,7 @@ cmdMap func (Generate a) =
 
 init : Task Never State
 init =
-    Task.map (Random.initialSeed << round) Time.now
+    Task.map (Debug.log "initialized" << Random.initialSeed << round) Time.now
 
 onEffects : Platform.Router msg Never -> List (MgrCmd msg) -> State -> Task Never State
 onEffects router commands seed =
@@ -96,11 +100,14 @@ onEffects router commands seed =
         Generate tagger :: rest ->
             let
                 route (key, newSeed) =
+                    -- this line should be composing the tagger and the key from
+                    -- the arguments like:
+                    -- Platform.sendToApp router (tagger key)
                     Platform.sendToApp router tagger
-                        |> Task.andThen (\_ -> onEffects router rest newSeed)
+                        |> Task.andThen (\_ -> onEffects router rest (Debug.log "new seed persisted" newSeed))
             in
                 Task.andThen route <| generateKey seed
 
 onSelfMsg : Platform.Router msg Never -> Never -> State -> Task Never State
 onSelfMsg _ _ seed =
-    Task.succeed seed
+    Debug.log "onSelfMsg" <| Task.succeed seed

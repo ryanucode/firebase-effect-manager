@@ -24,6 +24,8 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
     case msg of
         Generate ->
+            -- the "test string here is nessicary to satify the type checker. I
+            -- would like to factor out.
             model ! [Key.generate <| AddKey "test"]
         AddKey key ->
             (key :: model) ! []
