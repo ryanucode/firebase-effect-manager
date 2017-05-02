@@ -3,42 +3,10 @@
 This is an elm implementation of the [Firebase unique ID generation algorithm](https://gist.github.com/mikelehen/3596a30bd69384624c11)
 
 ## Current State
-Right now this will compile, but there is a problem. `Key.generate` does not
-pass the `Msg` a string and I am unable change `Key.generate` to pass a `msg`
-that is a function of type `String -> Msg` through.
-
-Right now the effect manager (Key.elm) seems to update the `Seed` appropriately. 
-See the console for `Debug` messages.
+`Key.elm` is now a working effect manager. It is largely a clone of
+[`Random`](https://github.com/elm-lang/core/blob/master/src/Random.elm).
 
 Main.elm is a toy interface to help quickly debug.
-
-## Plea for help
-Hoping that someone can help me figure out how to pass the type I want through
-the `Key.generate` and `onEffects` functions.
-
-Ideal `Key.generate` signature:
-```elm
-generate : (String -> msg) -> Cmd msg
-```
-
-
-Ideal usage:
-
-```
-type alias Model = List String
-
-type Msg
-    = Generate
-    | AddKey String
-
-update msg model
-    case msg of
-        Generate ->
-            (model, Cmd.batch [ Key.generate AddKey ])
-        AddKey key ->
-            (key :: model, Cmd.none)
-```
-
 
 ## Reasoning for Using an Effect Manager
 Currently the code in Key.elm does work provided you pass the `Seed` generated

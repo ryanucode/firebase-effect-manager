@@ -1,27 +1,9 @@
-effect module Key where { command = MgrCmd } exposing (..)
+effect module Key where { command = MgrCmd } exposing (generate)
 
 import Task exposing (Task)
 import Random
 import Random.String as Random
 import Time
-
-{--
-    See the EFFECT MANAGER section for the troubled part of this file.
---}
-
--- firebase key generation
-generateKeys : Random.Seed -> Int -> Task Never (List String, Random.Seed)
-generateKeys seed count =
-    let
-        tail currentCount thisSeed keys =
-            if currentCount <= 0 then
-                Task.succeed (List.sort keys, thisSeed)
-            else
-                generateKey thisSeed
-                    |> Task.andThen
-                        (\(key, newSeed) -> tail (currentCount - 1) newSeed (key :: keys))
-    in
-        tail count seed []
 
 {-| 
     **WARNING** Do not call this multiple times with the same seed! It will
@@ -35,7 +17,7 @@ generateKeys seed count =
     avoid that check (and since elm's Random implementation is deterministic
     we have to!) by using as seed initialized at a time independent of the
     time the key is generated at.
-|-}
+--}
 generateKey : Random.Seed -> Task Never (String, Random.Seed)
 generateKey seed =
     let
@@ -99,9 +81,6 @@ onEffects router commands seed =
         Generate tagger :: rest ->
             let
                 route (key, newSeed) =
-                    -- this line should be composing the tagger and the key from
-                    -- the arguments like:
-                    -- Platform.sendToApp router (tagger key)
                     Platform.sendToApp router (tagger key)
                         |> Task.andThen (\_ -> onEffects router rest (Debug.log "new seed persisted" newSeed))
             in
