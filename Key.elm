@@ -63,30 +63,29 @@ charGenerator =
 timeString : Float -> String
 timeString time =
     let
-        timeMod mod =
-            floor (time / (64 ^ toFloat mod)) % 64
+        timeBase64 power =
+            floor (time / (64 ^ toFloat power)) % 64
     in
         List.range 0 7
-            |> List.map (timeMod >> charInPool)
+            |> List.map (timeBase64 >> charInPool)
             |> List.reverse
             |> String.fromList
 
 
 -- EFFECT MANAGER
 
-type MgrCmd msg = Generate msg
+type MgrCmd msg = Generate (String -> msg)
 
 type alias State =
     Random.Seed
 
--- Shoule have a type signature like 
-generate : msg -> Cmd msg
+generate : (String -> msg) -> Cmd msg
 generate =
     command << Generate
 
 cmdMap : (a -> b) -> MgrCmd a -> MgrCmd b
 cmdMap func (Generate a) =
-    Generate <| func a
+    Generate <| func << a
 
 init : Task Never State
 init =
@@ -103,7 +102,7 @@ onEffects router commands seed =
                     -- this line should be composing the tagger and the key from
                     -- the arguments like:
                     -- Platform.sendToApp router (tagger key)
-                    Platform.sendToApp router tagger
+                    Platform.sendToApp router (tagger key)
                         |> Task.andThen (\_ -> onEffects router rest (Debug.log "new seed persisted" newSeed))
             in
                 Task.andThen route <| generateKey seed

@@ -8,9 +8,6 @@ main : Program Never Model Msg
 main = Html.program
     { init = [] ! 
         []
-        --[ Key.generate AddKey
-        --, Key.generate AddKey
-        --]
     , update = update
     , view = view
     , subscriptions = \_ -> Sub.none
@@ -26,7 +23,17 @@ update msg model =
         Generate ->
             -- the "test string here is nessicary to satify the type checker. I
             -- would like to factor out.
-            model ! [Key.generate <| AddKey "test"]
+            ( model
+            , Cmd.batch 
+                [ Key.generate AddKey
+                , Key.generate AddKey
+                , Key.generate AddKey
+                , Key.generate AddKey
+                , Key.generate AddKey
+                , Key.generate AddKey
+                , Key.generate AddKey
+                ]
+            )
         AddKey key ->
             (key :: model) ! []
 
